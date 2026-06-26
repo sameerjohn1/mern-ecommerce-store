@@ -57,20 +57,42 @@ export const signup = async (req, res) => {
     setCookies(res, accessToken, refreshToken);
 
     res.status(201).json({
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      message: "User create successfully",
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     });
   } catch (error) {
+    console.log("Error is Signup controller", error.message);
     res.status(500).json({ message: error.message });
   }
 };
 
-export const login = async (req, res) => {};
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user && (await user.comparePassword(password))) {
+      const { accessToken, refreshToken } = generateTokens(user._id);
+
+      await storeRefreshToken(user._id, refreshToken);
+      setCookies(res, accessToken, refreshToken);
+
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      });
+    } else {
+      res.status(401).json({ message: "Invalid email or password" });
+    }
+  } catch (error) {
+    console.log("Error is Login controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 export const logout = async (req, res) => {
   try {
@@ -87,6 +109,7 @@ export const logout = async (req, res) => {
     res.clearCookie("refreshToken");
     res.json({ message: "Logged Out successfully" });
   } catch (error) {
+    console.log("Error is Logout controller", error.message);
     res.status(500).json({ message: "Server error", error: errormessage });
   }
 };
