@@ -147,3 +147,13 @@ export const toggleFeaturedProduct = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+async function updateFeaturedProductsCache() {
+  try {
+    const featuedProducts = await Product.find({ isFeatured: true });
+    // Update your cache with the featured products
+    await redis.set("featured_products", JSON.stringify(featuedProducts));
+  } catch (error) {
+    console.log("Error in updateFeaturedProductsCache function");
+  }
+}
