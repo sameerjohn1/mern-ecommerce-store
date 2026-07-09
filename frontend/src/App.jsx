@@ -1,12 +1,20 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 
 import Navbar from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
+import { userUserStore } from "./stores/useUserStore";
+import { useEffect } from "react";
 
 const App = () => {
+  const { user, checkAuth } = userUserStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
     <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
       {/* Background gradient */}
@@ -21,8 +29,14 @@ const App = () => {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
+          <Route
+            path="/signup"
+            element={!user ? <Signup /> : <Navigate to={"/"} />}
+          />
+          <Route
+            path="/login"
+            element={!user ? <Login /> : <Navigate to={"/"} />}
+          />
         </Routes>
       </div>
 
