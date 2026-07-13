@@ -16,7 +16,7 @@ router.get("/", protectRoute, adminRoute, async (req, res) => {
 
     const dailySalesDate = await getDailySalesDate(startDate, endDate);
 
-    res.json(analyticsData, dailySalesDate);
+    res.json({ analyticsData, dailySalesData: dailySalesDate });
   } catch (error) {
     console.log("Error in analytics route", error.message);
 

@@ -12,11 +12,11 @@ export const useProductStore = create((set) => ({
     try {
       const res = await axios.post("/products", productData);
       set((prevState) => ({
-        products: [...prevState.products, res.data],
+        products: [...prevState.products, res.data.product],
         loading: false,
       }));
     } catch (error) {
-      toast.error(error.response.data.error);
+      toast.error(error.response?.data?.error || "Failed to create product");
       set({ loading: false });
     }
   },
