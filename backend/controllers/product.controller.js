@@ -43,9 +43,13 @@ export const createProduct = async (req, res) => {
     let cloudinaryRespesponse = null;
 
     if (image) {
-      cloudinaryRespesponse = await cloudinary.uploader.upload(image, {
-        folder: "products",
-      });
+      try {
+        cloudinaryRespesponse = await cloudinary.uploader.upload(image, {
+          folder: "products",
+        });
+      } catch (uploadError) {
+        console.error("Cloudinary upload failed, using fallback:", uploadError.message);
+      }
     }
 
     const product = await Product.create({
@@ -54,7 +58,7 @@ export const createProduct = async (req, res) => {
       price,
       image: cloudinaryRespesponse?.secure_url
         ? cloudinaryRespesponse.secure_url
-        : "",
+        : (image && !image.startsWith("data:") ? image : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"),
       category,
     });
 
@@ -72,7 +76,7 @@ export const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    if (product.image) {
+    if (product.image && product.image.includes("cloudinary")) {
       const publicId = product.image.split("/").pop().split(".")[0];
       try {
         await cloudinary.uploader.destroy(`products/${publicId}`);
