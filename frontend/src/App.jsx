@@ -9,6 +9,7 @@ import { useUserStore } from "./stores/useUserStore";
 import { useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
 import AdminPage from "./pages/AdminPage";
+import CategoryPage from "./pages/CategoryPage";
 
 const App = () => {
   const { user, checkAuth, checkingAuth } = useUserStore();
@@ -47,6 +48,8 @@ const App = () => {
               user?.role === "admin" ? <AdminPage /> : <Navigate to={"/ogin"} />
             }
           />
+
+          <Route path="/category/:category" element={<CategoryPage />} />
         </Routes>
       </div>
 
