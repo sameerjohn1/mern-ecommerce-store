@@ -34,7 +34,7 @@ const Navbar = () => {
               <Link
                 to={"/cart"}
                 className="relative group text-gray-300 hover:text-emerald-400 transition duration-300 
-			ease-in-out"
+			          ease-in-out"
               >
                 <ShoppingCart
                   className="inline-block mr-1 group hover:text-emerald-400"
