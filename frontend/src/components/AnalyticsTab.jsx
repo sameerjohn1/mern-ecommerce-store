@@ -1,10 +1,14 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import axios from "../lib/axios";
-import { Users, Package, ShoppingCart, DollarSign } from "lucide-react";
+import { Users, Package, ShoppingCart, DollarSign, TrendingUp, AreaChart as AreaChartIcon, BarChart3 } from "lucide-react";
 import {
   LineChart,
   Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -22,6 +26,7 @@ const AnalyticsTab = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [dailySalesData, setDailySalesData] = useState([]);
+  const [activeChartType, setActiveChartType] = useState("line");
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
@@ -72,36 +77,135 @@ const AnalyticsTab = () => {
         />
       </div>
       <motion.div
-        className="bg-gray-800/60 rounded-lg p-6 shadow-lg"
+        className="bg-gray-800/60 backdrop-blur-md rounded-lg p-6 shadow-lg border border-gray-700/50"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.25 }}
       >
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <h2 className="text-xl font-bold text-white">Sales & Revenue Overview</h2>
+          <div className="flex bg-gray-700/50 p-1 rounded-lg border border-gray-600">
+            <button
+              onClick={() => setActiveChartType("line")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${
+                activeChartType === "line"
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Line
+            </button>
+            <button
+              onClick={() => setActiveChartType("area")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${
+                activeChartType === "area"
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <AreaChartIcon className="h-4 w-4" />
+              Area
+            </button>
+            <button
+              onClick={() => setActiveChartType("bar")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${
+                activeChartType === "bar"
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <BarChart3 className="h-4 w-4" />
+              Bar
+            </button>
+          </div>
+        </div>
+
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={dailySalesData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" stroke="#D1D5DB" />
-            <YAxis yAxisId="left" stroke="#D1D5DB" />
-            <YAxis yAxisId="right" orientation="right" stroke="#D1D5DB" />
-            <Tooltip />
-            <Legend />
-            <Line
-              yAxisId="left"
-              type="monotone"
-              dataKey="sales"
-              stroke="#10B981"
-              activeDot={{ r: 8 }}
-              name="Sales"
-            />
-            <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="revenue"
-              stroke="#3B82F6"
-              activeDot={{ r: 8 }}
-              name="Revenue"
-            />
-          </LineChart>
+          {activeChartType === "line" ? (
+            <LineChart data={dailySalesData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" stroke="#D1D5DB" />
+              <YAxis yAxisId="left" stroke="#D1D5DB" />
+              <YAxis yAxisId="right" orientation="right" stroke="#D1D5DB" />
+              <Tooltip />
+              <Legend />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="sales"
+                stroke="#10B981"
+                activeDot={{ r: 8 }}
+                name="Sales"
+              />
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="revenue"
+                stroke="#3B82F6"
+                activeDot={{ r: 8 }}
+                name="Revenue"
+              />
+            </LineChart>
+          ) : activeChartType === "area" ? (
+            <AreaChart data={dailySalesData}>
+              <defs>
+                <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" stroke="#D1D5DB" />
+              <YAxis yAxisId="left" stroke="#D1D5DB" />
+              <YAxis yAxisId="right" orientation="right" stroke="#D1D5DB" />
+              <Tooltip />
+              <Legend />
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="sales"
+                stroke="#10B981"
+                fillOpacity={1}
+                fill="url(#colorSales)"
+                name="Sales"
+              />
+              <Area
+                yAxisId="right"
+                type="monotone"
+                dataKey="revenue"
+                stroke="#3B82F6"
+                fillOpacity={1}
+                fill="url(#colorRevenue)"
+                name="Revenue"
+              />
+            </AreaChart>
+          ) : (
+            <BarChart data={dailySalesData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" stroke="#D1D5DB" />
+              <YAxis yAxisId="left" stroke="#D1D5DB" />
+              <YAxis yAxisId="right" orientation="right" stroke="#D1D5DB" />
+              <Tooltip />
+              <Legend />
+              <Bar
+                yAxisId="left"
+                dataKey="sales"
+                fill="#10B981"
+                name="Sales"
+              />
+              <Bar
+                yAxisId="right"
+                dataKey="revenue"
+                fill="#3B82F6"
+                name="Revenue"
+              />
+            </BarChart>
+          )}
         </ResponsiveContainer>
       </motion.div>
     </div>
