@@ -1,5 +1,6 @@
 import Coupon from "../models/coupon.model.js";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 import { stripe } from "../lib/stripe.js";
 
 export const createCheckoutSession = async (req, res) => {
@@ -79,6 +80,16 @@ export const checkoutSuccess = async (req, res) => {
 		const session = await stripe.checkout.sessions.retrieve(sessionId);
 
 		if (session.payment_status === "paid") {
+			// Check if order already exists
+			const existingOrder = await Order.findOne({ stripeSessionId: sessionId });
+			if (existingOrder) {
+				return res.status(200).json({
+					success: true,
+					message: "Order already processed and created.",
+					orderId: existingOrder._id,
+				});
+			}
+
 			if (session.metadata.couponCode) {
 				await Coupon.findOneAndUpdate(
 					{
@@ -105,6 +116,11 @@ export const checkoutSuccess = async (req, res) => {
 			});
 
 			await newOrder.save();
+
+			// Clear user's cart in DB
+			await User.findByIdAndUpdate(session.metadata.userId, {
+				cartItems: [],
+			});
 
 			res.status(200).json({
 				success: true,
