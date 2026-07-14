@@ -6,7 +6,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
 
 const stripePromise = loadStripe(
-	"pk_test_51KZYccCoOZF2UhtOwdXQl3vcizup20zqKqT9hVUIsVzsdBrhqbUI2fE0ZdEVLdZfeHjeyFXtqaNsyCJCmZWnjNZa00PzMAjlcL"
+	"pk_test_51MtObOSH0Mm4hNhDX5OBKqdClFxMYhwyyl5qPhKV4L9sghAAqzQETk0Qk773zHqTjWJCVT4JzMsd61NA4T8ZCvhh00hGQLIq4P"
 );
 
 const OrderSummary = () => {
@@ -18,19 +18,20 @@ const OrderSummary = () => {
 	const formattedSavings = savings.toFixed(2);
 
 	const handlePayment = async () => {
-		const stripe = await stripePromise;
-		const res = await axios.post("/payments/create-checkout-session", {
-			products: cart,
-			couponCode: coupon ? coupon.code : null,
-		});
+		try {
+			const res = await axios.post("/payments/create-checkout-session", {
+				products: cart,
+				couponCode: coupon ? coupon.code : null,
+			});
 
-		const session = res.data;
-		const result = await stripe.redirectToCheckout({
-			sessionId: session.id,
-		});
-
-		if (result.error) {
-			console.error("Error:", result.error);
+			const session = res.data;
+			if (session.url) {
+				window.location.href = session.url;
+			} else {
+				console.error("Error: Stripe checkout session URL is missing");
+			}
+		} catch (error) {
+			console.error("Error in checkout payment:", error);
 		}
 	};
 
