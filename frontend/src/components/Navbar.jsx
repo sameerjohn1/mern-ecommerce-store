@@ -1,4 +1,4 @@
-import { ShoppingCart, UserPlus, LogIn, LogOut, Lock } from "lucide-react";
+import { ShoppingCart, UserPlus, LogIn, LogOut, Lock, ShoppingBag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
@@ -55,6 +55,21 @@ const Navbar = () => {
 								)}
               </Link>
             )}
+
+            {user && (
+              <Link
+                to={"/orders"}
+                className="relative group text-gray-300 hover:text-emerald-400 transition duration-300 
+			          ease-in-out"
+              >
+                <ShoppingBag
+                  className="inline-block mr-1 group hover:text-emerald-400"
+                  size={20}
+                />
+                <span className="hidden sm:inline">Orders</span>
+              </Link>
+            )}
+
 
             {isAdmin && (
               <Link
