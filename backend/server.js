@@ -9,11 +9,16 @@ import couponRoutes from "./routes/coupon.route.js";
 import paymentRoutes from "./routes/payment.route.js";
 import analyticsRoutes from "./routes/analytics.route.js";
 import orderRoutes from "./routes/order.route.js";
+import { handleWebhook } from "./controllers/payment.controller.js";
+
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Webhook must be registered BEFORE express.json() to capture raw request body for verification
+app.post("/api/payments/webhook", express.raw({ type: "application/json" }), handleWebhook);
 
 app.use(express.json());
 app.use(cookieParser());
