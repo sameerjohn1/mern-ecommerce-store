@@ -157,3 +157,68 @@ async function createNewCoupon(userId) {
 
 	return newCoupon;
 }
+
+export const handleWebhook = async (req, res) => {
+	const sig = req.headers["stripe-signature"];
+	let event;
+
+	try {
+		event = stripe.webhooks.constructEvent(
+			req.body,
+			sig,
+			process.env.STRIPE_WEBHOOK_SECRET
+		);
+	} catch (err) {
+		console.error("Webhook signature verification failed:", err.message);
+		return res.status(400).send(`Webhook Error: ${err.message}`);
+	}
+
+	if (event.type === "checkout.session.completed") {
+		const session = event.data.object;
+
+		try {
+			// Check if order already exists
+			const existingOrder = await Order.findOne({ stripeSessionId: session.id });
+			if (!existingOrder) {
+				if (session.metadata.couponCode) {
+					await Coupon.findOneAndUpdate(
+						{
+							code: session.metadata.couponCode,
+							userId: session.metadata.userId,
+						},
+						{
+							isActive: false,
+						}
+					);
+				}
+
+				// Create the new Order
+				const products = JSON.parse(session.metadata.products);
+				const newOrder = new Order({
+					user: session.metadata.userId,
+					products: products.map((product) => ({
+						product: product.id,
+						quantity: product.quantity,
+						price: product.price,
+					})),
+					totalAmount: session.amount_total / 100, // convert from cents to dollars
+					stripeSessionId: session.id,
+				});
+
+				await newOrder.save();
+
+				// Clear user's cart in DB
+				await User.findByIdAndUpdate(session.metadata.userId, {
+					cartItems: [],
+				});
+
+				console.log(`Order created successfully via Webhook for user ${session.metadata.userId}`);
+			}
+		} catch (error) {
+			console.error("Error processing checkout.session.completed event in webhook:", error);
+			return res.status(500).json({ message: "Error processing webhook event", error: error.message });
+		}
+	}
+
+	res.json({ received: true });
+};
