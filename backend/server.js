@@ -37,7 +37,7 @@ app.use("/api/orders", orderRoutes);
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(rootDir, "/frontend/dist")));
 
-	app.get("(.*)", (req, res) => {
+	app.get("*all", (req, res) => {
 		res.sendFile(path.resolve(rootDir, "frontend", "dist", "index.html"));
 	});
 }
