@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useProductStore } from "../stores/useProductStore";
+import { useFeaturedProductsQuery, useFilteredProductsQuery } from "../hooks/useProductQueries";
 import FeaturedProducts from "../components/FeaturedProducts";
 import ProductCard from "../components/ProductCard";
 import FilterSelector from "../components/FilterSelector";
@@ -46,15 +46,6 @@ const ProductSkeleton = () => (
 );
 
 const HomePage = () => {
-	const { 
-		fetchFeaturedProducts, 
-		products, 
-		isLoading,
-		fetchFilteredProducts,
-		filteredProducts,
-		isFilteredLoading
-	} = useProductStore();
-
 	const [search, setSearch] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	
@@ -78,21 +69,16 @@ const HomePage = () => {
 		};
 	}, [search]);
 
-	// Fetch featured products (once on mount)
-	useEffect(() => {
-		fetchFeaturedProducts();
-	}, [fetchFeaturedProducts]);
+	// React Query hooks for cached fetching
+	const { data: products = [], isLoading } = useFeaturedProductsQuery();
 
-	// Fetch filtered products when filters change
-	useEffect(() => {
-		fetchFilteredProducts({
-			category: selectedCategories.length > 0 ? selectedCategories.join(",") : "all",
-			minPrice,
-			maxPrice,
-			search: debouncedSearch,
-			sort,
-		});
-	}, [fetchFilteredProducts, selectedCategories, minPrice, maxPrice, debouncedSearch, sort]);
+	const { data: filteredProducts = [], isLoading: isFilteredLoading } = useFilteredProductsQuery({
+		category: selectedCategories.length > 0 ? selectedCategories.join(",") : "all",
+		minPrice,
+		maxPrice,
+		search: debouncedSearch,
+		sort,
+	});
 
 	// Handler passed as prop to price selector to calculate bounding ranges
 	const handlePriceChange = (updatedRanges) => {
