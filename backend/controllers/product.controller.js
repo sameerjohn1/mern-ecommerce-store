@@ -173,4 +173,58 @@ export const getProductById = async (req, res) => {
     console.log("Error in getProductById Controller", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
-};
+};
+
+export const getFilteredProducts = async (req, res) => {
+  try {
+    const { category, minPrice, maxPrice, search, sort } = req.query;
+
+    let query = {};
+
+    if (category && category !== "all") {
+      if (Array.isArray(category)) {
+        query.category = { $in: category.map((c) => c.toLowerCase()) };
+      } else if (typeof category === "string") {
+        const categoryList = category.split(",").map((c) => c.trim().toLowerCase()).filter(Boolean);
+        if (categoryList.length > 1) {
+          query.category = { $in: categoryList };
+        } else if (categoryList.length === 1) {
+          query.category = categoryList[0];
+        }
+      }
+    }
+
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    let sortOption = {};
+    if (sort === "price_asc") {
+      sortOption.price = 1;
+    } else if (sort === "price_desc") {
+      sortOption.price = -1;
+    } else if (sort === "title_asc") {
+      sortOption.name = 1;
+    } else if (sort === "title_desc") {
+      sortOption.name = -1;
+    } else {
+      sortOption.createdAt = -1;
+    }
+
+    const products = await Product.find(query).sort(sortOption);
+    res.json({ products });
+  } catch (error) {
+    console.log("Error in getFilteredProducts controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
