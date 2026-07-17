@@ -54,3 +54,7 @@ uploads/
 # Environment backups
 .env.*
 !.env.example
+
+# Backend Isolation Ignored Files
+backend/node_modules/
+backend/.env
