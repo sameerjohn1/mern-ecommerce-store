@@ -5,6 +5,8 @@ import axios from "../lib/axios";
 export const useProductStore = create((set) => ({
   products: [],
   loading: false,
+  filteredProducts: [],
+  isFilteredLoading: false,
 
   setProducts: (products) => set({ products }),
   createProduct: async (productData) => {
@@ -92,6 +94,33 @@ export const useProductStore = create((set) => ({
     } catch (error) {
       set({ currentProduct: null, loading: false });
       toast.error(error.response?.data?.message || "Failed to fetch product details");
+    }
+  },
+  fetchFilteredProducts: async (filters = {}) => {
+    set({ isFilteredLoading: true });
+    try {
+      const params = new URLSearchParams();
+      if (filters.category && filters.category !== "all") {
+        params.append("category", filters.category);
+      }
+      if (filters.minPrice) {
+        params.append("minPrice", filters.minPrice);
+      }
+      if (filters.maxPrice) {
+        params.append("maxPrice", filters.maxPrice);
+      }
+      if (filters.search) {
+        params.append("search", filters.search);
+      }
+      if (filters.sort) {
+        params.append("sort", filters.sort);
+      }
+
+      const response = await axios.get(`/products/filtered?${params.toString()}`);
+      set({ filteredProducts: response.data.products, isFilteredLoading: false });
+    } catch (error) {
+      set({ filteredProducts: [], isFilteredLoading: false });
+      toast.error(error.response?.data?.message || "Failed to fetch filtered products");
     }
   },
 }));

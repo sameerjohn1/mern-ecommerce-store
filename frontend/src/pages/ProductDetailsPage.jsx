@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useProductStore } from "../stores/useProductStore";
+import { useProductDetailsQuery } from "../hooks/useProductQueries";
 import { useCartStore } from "../stores/useCartStore";
 import { useUserStore } from "../stores/useUserStore";
 import { motion } from "framer-motion";
@@ -10,13 +9,9 @@ import toast from "react-hot-toast";
 
 const ProductDetailsPage = () => {
 	const { id } = useParams();
-	const { currentProduct, loading, fetchProductById } = useProductStore();
+	const { data: currentProduct, isLoading } = useProductDetailsQuery(id);
 	const { addToCart } = useCartStore();
 	const { user } = useUserStore();
-
-	useEffect(() => {
-		fetchProductById(id);
-	}, [fetchProductById, id]);
 
 	const handleAddToCart = () => {
 		if (!user) {
@@ -26,7 +21,7 @@ const ProductDetailsPage = () => {
 		addToCart(currentProduct);
 	};
 
-	if (loading) return <LoadingSpinner />;
+	if (isLoading) return <LoadingSpinner />;
 
 	if (!currentProduct) {
 		return (
