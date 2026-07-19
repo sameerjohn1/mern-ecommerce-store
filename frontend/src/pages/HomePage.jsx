@@ -3,6 +3,7 @@ import { useFeaturedProductsQuery, useFilteredProductsQuery } from "../hooks/use
 import FeaturedProducts from "../components/FeaturedProducts";
 import ProductCard from "../components/ProductCard";
 import FilterSelector from "../components/FilterSelector";
+import HeroSection from "../components/HeroSection";
 import { Search, RotateCcw } from "lucide-react";
 
 // Predefined Filter Options (Passed to FilterSelector as props)
@@ -109,7 +110,8 @@ const HomePage = () => {
 	};
 
 	return (
-		<div className='relative min-h-screen text-white overflow-hidden'>
+		<div className='relative min-h-screen text-white overflow-hidden bg-gray-950'>
+			<HeroSection />
 			<div className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16'>
 				
 				{/* SHOP COLLECTION SECTION */}
