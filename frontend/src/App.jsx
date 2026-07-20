@@ -17,6 +17,7 @@ import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import OrdersPage from "./pages/OrdersPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
+import AiChatbot from "./components/AiChatbot";
 
 
 const App = () => {
@@ -91,6 +92,7 @@ const App = () => {
         </Routes>
       </div>
 
+      <AiChatbot />
       <Toaster />
     </div>
   );

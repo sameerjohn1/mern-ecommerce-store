@@ -9,6 +9,7 @@ import couponRoutes from "./routes/coupon.route.js";
 import paymentRoutes from "./routes/payment.route.js";
 import analyticsRoutes from "./routes/analytics.route.js";
 import orderRoutes from "./routes/order.route.js";
+import aiRoutes from "./routes/ai.route.js";
 import { handleWebhook } from "./controllers/payment.controller.js";
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
   res.json({ status: "API is running" });
